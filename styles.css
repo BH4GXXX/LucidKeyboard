@@ -1,0 +1,151 @@
+:root {
+  --panel: rgba(18, 20, 26, 0.55);
+  --key-bg: rgba(255, 255, 255, 0.08);
+  --key-border: rgba(255, 255, 255, 0.16);
+  --key-text: rgba(240, 244, 250, 0.9);
+  --active-bg: rgba(90, 165, 255, 0.95);
+  --active-glow: rgba(90, 165, 255, 0.75);
+  --active-text: #ffffff;
+  --blur: 16px;
+  --radius: 9px;
+  --scale: 1;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+#root { position: relative; height: 100%; }
+
+#keyboard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(7px * var(--scale));
+  padding: calc(12px * var(--scale));
+  border-radius: calc(16px * var(--scale));
+  background: var(--panel);
+  backdrop-filter: blur(var(--blur));
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+#root.locked #keyboard { backdrop-filter: blur(calc(var(--blur) * 0.6)); }
+/* Dragging is handled in JS (mousedown/mousemove/mouseup -> IPC), not via
+   -webkit-app-region, which was unreliable at excluding button clicks on
+   Windows when overlapping a drag region. */
+#root.unlocked #keyboard { cursor: move; }
+
+.row { display: flex; gap: calc(7px * var(--scale)); flex: 1; }
+
+.key {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--radius) * var(--scale));
+  background: var(--key-bg);
+  border: 1px solid var(--key-border);
+  color: var(--key-text);
+  font-size: calc(15px * var(--scale));
+  font-weight: 500;
+  transition: background 0.04s ease, box-shadow 0.08s ease,
+              color 0.04s ease, transform 0.04s ease;
+}
+.key.small { font-size: calc(12px * var(--scale)); }
+
+.key.active {
+  background: var(--active-bg);
+  color: var(--active-text);
+  border-color: var(--active-glow);
+  box-shadow: 0 0 calc(14px * var(--scale)) calc(2px * var(--scale)) var(--active-glow);
+  transform: translateY(1px) scale(0.97);
+}
+
+/* --- Lock button: position driven by #root[data-lock] --------------------- */
+#lockBtn {
+  position: absolute;
+  top: 6px;
+  z-index: 30;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(20, 22, 30, 0.7);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.16s ease, background 0.1s ease, box-shadow 0.1s ease;
+}
+#root[data-lock="right"]  #lockBtn { right: 6px; left: auto; transform: none; }
+#root[data-lock="left"]   #lockBtn { left: 6px;  right: auto; transform: none; }
+#root[data-lock="center"] #lockBtn { left: 50%; right: auto; transform: translateX(-50%); }
+
+#root.unlocked #lockBtn {
+  opacity: 1;
+  background: rgba(90, 165, 255, 0.85);
+  border-color: rgba(130, 190, 255, 0.9);
+}
+#root.locked #lockBtn { opacity: 0.4; }
+#root.locked #lockBtn.hot {
+  opacity: 1;
+  background: rgba(20, 22, 30, 0.92);
+  box-shadow: 0 0 10px 2px rgba(90, 165, 255, 0.6);
+}
+
+/* --- Unlocked toolbar ------------------------------------------------------ */
+#toolbar {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 22, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #eef1f6;
+  font-size: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+#toolbar.hidden { display: none; }
+#toolbar .grip { opacity: 0.65; cursor: move; }
+
+/* When the lock button occupies the centre, move the toolbar left so they
+   don't overlap. */
+#root[data-lock="center"] #toolbar { left: 8px; transform: none; }
+
+#toolbar .group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#toolbar button,
+#toolbar select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #eef1f6;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+#toolbar button:hover { background: rgba(255, 255, 255, 0.2); }
+#toolbar #scaleLabel { min-width: 38px; text-align: center; }

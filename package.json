@@ -1,0 +1,32 @@
+{
+  "name": "lucidkeyboard",
+  "version": "1.0.0",
+  "description": "LucidKeyboard — a transparent, always-on-top keystroke visualizer. Highlights the key you press on your physical keyboard, auto-hides when you move the mouse, and can be pinned as a low-opacity click-through overlay. Cross-platform (Windows / macOS / Linux X11).",
+  "author": "Night Master",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "dependencies": {
+    "uiohook-napi": "^1.5.5"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bh4gxx.lucidkeyboard",
+    "productName": "LucidKeyboard",
+    "files": ["**/*", "!**/*.md", "!build/**"],
+    "extraResources": ["assets/**"],
+    "asarUnpack": ["assets/**"],
+    "win": { "target": "nsis", "icon": "assets/icon.ico" },
+    "mac": { "target": "dmg", "icon": "assets/icon.png", "category": "public.app-category.utilities" },
+    "linux": { "target": "AppImage", "icon": "assets/icon.png", "category": "Utility" }
+  }
+}
